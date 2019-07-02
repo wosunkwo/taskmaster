@@ -37,7 +37,7 @@ public class TaskMasterController {
     @PutMapping("/tasks/{id}/state")
     public List<TaskMaster> putState(@PathVariable UUID id){
         TaskMaster task = repository.findById(id).get();
-        
+
         if(task.getStatus().equals("Available")){
             task.setStatus("Assigned");
         }
