@@ -27,8 +27,15 @@ public class TaskMasterController {
     }
 
     @PostMapping("/tasks")
-    public List<TaskMaster> AddTask(@RequestParam String title, @RequestParam String description){
-        TaskMaster task = new TaskMaster(title, description);
+    public List<TaskMaster> AddTask(@RequestParam String title, @RequestParam String description, @RequestParam(required = false, defaultValue = "") String assignee){
+        TaskMaster task;
+        if(assignee.equals(""))
+        {
+            task = new TaskMaster(title, description);
+        }else
+        {
+            task = new TaskMaster(title, description, assignee);
+        }
         repository.save(task);
         List<TaskMaster> tasks = (List) repository.findAll();
         return tasks;
@@ -47,6 +54,22 @@ public class TaskMasterController {
         else if(task.getStatus().equals("Accepted")){
             task.setStatus("Finished");
         }
+        repository.save(task);
+        List<TaskMaster> tasks = (List) repository.findAll();
+        return tasks;
+    }
+
+    @GetMapping("/users/{name}/tasks")
+    public List<TaskMaster> getUserTask(@PathVariable String name){
+        List<TaskMaster> allUserTask = repository.findByAssignee(name);
+        return allUserTask;
+    }
+
+    @PutMapping("/tasks/{id}/assign/{assignee}")
+    public List<TaskMaster> assignUserToTask(@PathVariable UUID id, @PathVariable String assignee){
+        TaskMaster task = repository.findById(id).get();
+        task.setAssignee(assignee);
+        task.setStatus("Assigned");
         repository.save(task);
         List<TaskMaster> tasks = (List) repository.findAll();
         return tasks;
