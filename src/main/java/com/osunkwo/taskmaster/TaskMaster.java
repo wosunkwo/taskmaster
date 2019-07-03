@@ -20,9 +20,18 @@ public class TaskMaster {
     private String title;
     private String description;
     private String status;
+    private String assignee;
 
     public TaskMaster(){
 
+    }
+
+
+    public TaskMaster(String title, String description, String assignee){
+        this.title = title;
+        this.description = description;
+        this.assignee = assignee;
+        this.status = "Assigned";
     }
 
     public TaskMaster(String title, String description){
@@ -63,6 +72,14 @@ public class TaskMaster {
     @DynamoDBAttribute
     public String getStatus() {
         return status;
+    }
+    @DynamoDBAttribute
+    public String getAssignee() {
+        return assignee;
+    }
+
+    public void setAssignee(String assignee) {
+        this.assignee = assignee;
     }
 
    public void setStatus(String status) {
