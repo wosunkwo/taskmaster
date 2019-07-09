@@ -8,12 +8,6 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 import java.util.UUID;
 
 
-//enum Status
-//{
-//    Available, Assigned, Accepted, Finished;
-//}
-
-
 @DynamoDBTable(tableName = "Task")
 public class TaskMaster {
     private UUID id;
@@ -21,11 +15,15 @@ public class TaskMaster {
     private String description;
     private String status;
     private String assignee;
+    private String pic;
 
     public TaskMaster(){
 
     }
 
+    public TaskMaster(String pic){
+        this.pic = pic;
+    }
 
     public TaskMaster(String title, String description, String assignee){
         this.title = title;
@@ -84,14 +82,14 @@ public class TaskMaster {
 
    public void setStatus(String status) {
         this.status = status;
-//        switch(this.status)
-//        {
-//            case Available:
-//                this.status = Status.Assigned;
-//            case Assigned:
-//                this.status = Status.Accepted;
-//            case Accepted:
-//                this.status = Status.Finished;
-//        }
+    }
+
+    @DynamoDBAttribute
+    public String getPic() {
+        return pic;
+    }
+
+    public void setPic(String pic) {
+        this.pic = pic;
     }
 }

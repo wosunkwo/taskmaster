@@ -3,22 +3,32 @@ package com.osunkwo.taskmaster;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 @RestController
+@CrossOrigin
 public class TaskMasterController {
+
+    private S3Client s3Client;
 
     @Autowired
     TaskMasterRepository repository;
+
+    @Autowired
+    TaskMasterController(S3Client s3Client){
+        this.s3Client = s3Client;
+    }
 
 
     @GetMapping("/")
     public String GetHome(){
         return "home";
     }
-
 
     @GetMapping("/tasks")
     public List<TaskMaster> GetTask(){
@@ -65,6 +75,15 @@ public class TaskMasterController {
         return allUserTask;
     }
 
+    @PostMapping("/tasks/{id}/images")
+    public void addPic(@PathVariable UUID id, HttpServletResponse response, @RequestPart(value = "file")MultipartFile file) throws IOException {
+        String pic = this.s3Client.uploadFile(file);
+        TaskMaster task = repository.findById(id).get();
+        task.setPic(pic);
+        repository.save(task);
+        response.sendRedirect("http://taskmaster-app.s3-website-us-west-2.amazonaws.com");
+    }
+
     @PutMapping("/tasks/{id}/assign/{assignee}")
     public List<TaskMaster> assignUserToTask(@PathVariable UUID id, @PathVariable String assignee){
         TaskMaster task = repository.findById(id).get();
@@ -72,6 +91,12 @@ public class TaskMasterController {
         task.setStatus("Assigned");
         repository.save(task);
         List<TaskMaster> tasks = (List) repository.findAll();
+        return tasks;
+    }
+
+    @GetMapping("/tasks/{id}")
+    public TaskMaster GetSingleTask(@PathVariable UUID id){
+        TaskMaster tasks =  repository.findById(id).get();
         return tasks;
     }
 
