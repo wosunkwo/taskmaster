@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -77,9 +78,10 @@ public class TaskMasterController {
 
     @PostMapping("/tasks/{id}/images")
     public void addPic(@PathVariable UUID id, HttpServletResponse response, @RequestPart(value = "file")MultipartFile file) throws IOException {
-        String pic = this.s3Client.uploadFile(file);
+        ArrayList<String> picList = this.s3Client.uploadFile(file);
         TaskMaster task = repository.findById(id).get();
-        task.setPic(pic);
+        task.setPic(picList.get(0));
+        task.setThumbnailPic(picList.get(1));
         repository.save(task);
         response.sendRedirect("http://taskmaster-app.s3-website-us-west-2.amazonaws.com");
     }
