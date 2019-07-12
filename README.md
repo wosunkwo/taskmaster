@@ -27,6 +27,9 @@ Above mentioned feature tasks are implemented on the app.
 ## Link to the deployed frontend:
 [Deployed Front End](http://taskmaster-app.s3-website-us-west-2.amazonaws.com)
 
+## Link to Lambda Warmer Readme
+[Warmer Lab](https://github.com/wosunkwo/taskmaster/blob/master/Warmer.md)
+
 ## Routes:
 - GET request to /tasks and receive JSON data representing all of the tasks
 - POST request to /tasks with body parameters for title and description to add a new task.
