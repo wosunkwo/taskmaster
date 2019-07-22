@@ -1,5 +1,9 @@
 package com.osunkwo.taskmaster;
 
+import com.amazonaws.services.sns.AmazonSNSClient;
+import com.amazonaws.services.sns.model.MessageAttributeValue;
+import com.amazonaws.services.sns.model.PublishRequest;
+import com.amazonaws.services.sns.model.PublishResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -7,7 +11,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -15,6 +21,8 @@ import java.util.UUID;
 public class TaskMasterController {
 
     private S3Client s3Client;
+
+    private AmazonSESSample sesClient;
 
     @Autowired
     TaskMasterRepository repository;
@@ -30,11 +38,13 @@ public class TaskMasterController {
         return "home";
     }
 
+    @CrossOrigin
     @GetMapping("/tasks")
     public List<TaskMaster> GetTask(){
         List<TaskMaster> tasks = (List) repository.findAll();
         return tasks;
     }
+
 
     @PostMapping("/tasks")
     public List<TaskMaster> AddTask(@RequestParam String title, @RequestParam String description, @RequestParam(required = false, defaultValue = "") String assignee){
@@ -45,6 +55,7 @@ public class TaskMasterController {
         }else
         {
             task = new TaskMaster(title, description, assignee);
+            configureMessage("+15809196943");
         }
         repository.save(task);
         List<TaskMaster> tasks = (List) repository.findAll();
@@ -63,6 +74,8 @@ public class TaskMasterController {
         }
         else if(task.getStatus().equals("Accepted")){
             task.setStatus("Finished");
+            sesClient.sendEmail();
+
         }
         repository.save(task);
         List<TaskMaster> tasks = (List) repository.findAll();
@@ -90,6 +103,7 @@ public class TaskMasterController {
         task.setAssignee(assignee);
         task.setStatus("Assigned");
         repository.save(task);
+        configureMessage("+15809196943");
         List<TaskMaster> tasks = (List) repository.findAll();
         return tasks;
     }
@@ -99,5 +113,25 @@ public class TaskMasterController {
         TaskMaster tasks =  repository.findById(id).get();
         return tasks;
     }
+
+    //SNS function to help me send messages to a person once a task has been assigned
+    public static void configureMessage(String phoneNumber) {
+        AmazonSNSClient snsClient = new AmazonSNSClient();
+        String message = "A task has been assigned to you";
+        Map<String, MessageAttributeValue> smsAttributes =
+                new HashMap<>();
+        //<set SMS attributes>
+        sendSMSMessage(snsClient, message, phoneNumber, smsAttributes);
+    }
+
+    public static void sendSMSMessage(AmazonSNSClient snsClient, String message,
+                                      String phoneNumber, Map<String, MessageAttributeValue> smsAttributes) {
+        PublishResult result = snsClient.publish(new PublishRequest()
+                .withMessage(message)
+                .withPhoneNumber(phoneNumber)
+                .withMessageAttributes(smsAttributes));
+        System.out.println(result); // Prints the message ID.
+    }
+
 
 }
