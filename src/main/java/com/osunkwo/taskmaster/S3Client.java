@@ -8,6 +8,9 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.sqs.AmazonSQS;
+import com.amazonaws.services.sqs.AmazonSQSClientBuilder;
+import com.amazonaws.services.sqs.model.SendMessageRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,6 +55,9 @@ public class S3Client {
         ArrayList<String> urlList = new ArrayList<>();
 
         try {
+            if (multipartFile.getSize() > 350000) {
+                sendMessageToQueue();
+            }
             File file = convertMultiPartToFile(multipartFile);
             String fileName = generateFileName(multipartFile);
             urlList.add(endpointUrl + "/" + fileName);
@@ -64,6 +70,18 @@ public class S3Client {
         return urlList;
     }
 
+
+    private void sendMessageToQueue(){
+        final AmazonSQS sqs = AmazonSQSClientBuilder.defaultClient();
+
+        String imageResizerQueue = System.getenv("IMAGE_RESIZER_QUEUE");
+
+        SendMessageRequest sendMessageRequest = new SendMessageRequest()
+                .withQueueUrl(imageResizerQueue)
+                .withMessageBody("call lambda")
+                .withDelaySeconds(5);
+        sqs.sendMessage(sendMessageRequest);
+    }
 
     private File convertMultiPartToFile(MultipartFile file) throws IOException {
         File convFile = new File(file.getOriginalFilename());
