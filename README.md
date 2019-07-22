@@ -51,13 +51,14 @@ Resources:
 
 *************************************************************************************************************
 
-## July 22nd Lab
+# July 22nd Lab
 
-### Prove of SNS (successfully sending text message to a user when a task status is completed
+## Prove of SNS (successfully sending text message to a user when a task status is completed
 ![alt_text](https://github.com/wosunkwo/taskmaster/blob/master/assest/Image%20from%20iOS.png)
 
 
-### Prove of SES (successfully sending email to a user when a task is created
+----------------------------------------------------------------------------------------------------------------------
+## Prove of SES (successfully sending email to a user when a task is created
 ![alt_text](https://github.com/wosunkwo/taskmaster/blob/master/assest/Image%20from%20iOS%20(1).png)
 
 
